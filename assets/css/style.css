@@ -1,0 +1,465 @@
+@import url("https://fonts.googleapis.com/css2?family=Smooch+Sans:wght@400;700&display=swap");
+
+:root {
+    --bg: #F2F2F2;
+    --panel: #F2F2F2;
+    --line: #CBCBCB;
+    --tint: #CBCBCB;
+    --accent: #174D38;
+    --ink: #4D1717;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Smooch Sans', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.4;
+}
+
+h1,
+h2 {
+    margin: 0 0 12px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 22px;
+}
+
+h2 {
+    font-size: 16px;
+}
+
+p {
+    margin: 0 0 8px;
+}
+
+a {
+    color: var(--accent);
+}
+
+hr {
+    margin: 20px 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* top bar */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-height: 56px;
+    padding: 12px 24px;
+    border-bottom: 1px solid var(--line);
+}
+
+.brand {
+    color: var(--ink);
+    font-size: 18px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.topbar-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.topbar-links form {
+    margin: 0;
+}
+
+.page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* buttons */
+.btn {
+    display: inline-block;
+    padding: 6px 18px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
+    padding: 10px 18px;
+    margin-top: 16px;
+}
+
+.btn-roll {
+    padding: 12px 18px;
+    margin: 4px 0 12px;
+}
+
+.btn:focus-visible,
+input:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.button-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 28px 0 44px;
+}
+
+.button-row .btn {
+    padding: 11px 28px;
+}
+
+/* panels and forms */
+.panel {
+    padding: 20px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--panel);
+}
+
+.form-panel {
+    max-width: 400px;
+    margin: 40px auto;
+}
+
+label,
+legend {
+    display: block;
+    margin: 14px 0 6px;
+    padding: 0;
+    font-size: 14px;
+}
+
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.radio {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+}
+
+.radio input {
+    margin: 0;
+    accent-color: var(--accent);
+}
+
+input[type="text"],
+input[type="password"] {
+    display: block;
+    width: 100%;
+    padding: 7px 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 16px;
+}
+
+.hint,
+.note,
+.small {
+    font-size: 14px;
+}
+
+.hint {
+    margin: 4px 0 0;
+}
+
+.note {
+    margin-top: 12px;
+}
+
+.error,
+.notice {
+    padding: 8px 12px;
+    border: 1px solid var(--ink);
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.notice {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.form-footer {
+    margin: 16px 0 0;
+    font-size: 14px;
+}
+
+.text-link {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* landing */
+.landing {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+    gap: 48px;
+    align-items: center;
+    padding-top: 40px;
+}
+
+.hero-title {
+    font-size: 34px;
+}
+
+.hero-text {
+    font-size: 16px;
+}
+
+.landing-copy h2 {
+    margin: 24px 0 4px;
+}
+
+/* game screen */
+.game-layout {
+    display: grid;
+    grid-template-columns: 252px minmax(0, 560px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.game-side {
+    display: grid;
+    gap: 20px;
+}
+
+.turn-label,
+.player-active {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.roll-history {
+    margin: 12px 0 0;
+    padding: 6px 14px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.roll-history span {
+    margin-left: 10px;
+}
+
+/* board */
+.board {
+    position: relative;
+    width: min(100%, 560px);
+    aspect-ratio: 1;
+    border: 1px solid var(--line);
+}
+
+.board-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    width: 100%;
+    height: 100%;
+}
+
+.cell {
+    position: relative;
+    border: 1px solid var(--line);
+    font-size: 10px;
+}
+
+.cell-event {
+    background: var(--tint);
+}
+
+.cell-active {
+    outline: 3px solid var(--accent);
+    outline-offset: -3px;
+}
+
+.cell-number {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+}
+
+.cell-mark {
+    position: absolute;
+    right: 4px;
+    bottom: 2px;
+    font-weight: 700;
+}
+
+.board-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.snake-body {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 0.8;
+    stroke-linecap: round;
+}
+
+.snake-head {
+    fill: var(--ink);
+}
+
+.ladder {
+    stroke: var(--accent);
+    stroke-width: 0.4;
+}
+
+/* tokens: PHP sets both positions, the browser only plays the slide */
+.token {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10%;
+    height: 10%;
+    transform: var(--to);
+    transition: transform 400ms ease;
+    pointer-events: none;
+}
+
+.js .token-pending {
+    transform: var(--from);
+}
+
+.token-dot {
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    color: var(--bg);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    display: grid;
+    place-items: center;
+    translate: 0 -50%;
+}
+
+.token-1 .token-dot {
+    left: 8%;
+    background: var(--accent);
+}
+
+.token-2 .token-dot {
+    right: 8%;
+    background: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .token {
+        transition: none;
+    }
+}
+
+/* leaderboard */
+.leaderboard-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.score-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.score-table th,
+.score-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+}
+
+.score-table th {
+    font-weight: 700;
+}
+
+.recap-title {
+    margin: 14px 0 2px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+/* side panels stack below the board on tablets and phones */
+@media (max-width: 900px) {
+    .page {
+        padding: 16px;
+    }
+
+    .landing,
+    .game-layout,
+    .leaderboard-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .landing {
+        gap: 24px;
+        padding-top: 16px;
+    }
+
+    .game-board {
+        order: -1;
+    }
+
+    .board {
+        margin: 0 auto;
+    }
+}
