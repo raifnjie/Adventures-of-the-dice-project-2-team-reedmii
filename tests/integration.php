@@ -1,9 +1,11 @@
 <?php
-#integration test: runs the real pages on a local server against a throwaway database
+#integration test: runs the real pages on a local server against a throwaway data folder
 #covers duplicate usernames, empty names, rolls at cells 95 to 100, reload mid-game, logout mid-game
 declare(strict_types=1);
 
+require_once __DIR__ . '/test_data_dir.php';
 require_once __DIR__ . '/../src/game_engine.php';
+require_once __DIR__ . '/../src/storage.php';
 
 const IT_PORT = 8790;
 const IT_BASE = 'http://127.0.0.1:' . IT_PORT;
@@ -100,15 +102,11 @@ foreach (array_keys(board_difficulties()) as $difficulty) {
     check("$difficulty: rolls from cells 95 to 99 follow reach-or-exceed", $bad === 0);
 }
 
-#start the server with the same extensions this process has
-$dbFile = sys_get_temp_dir() . '/aod_it_' . bin2hex(random_bytes(4)) . '.sqlite';
-$command = [PHP_BINARY];
-if (php_ini_loaded_file() === false) {
-    $command = array_merge($command, ['-d', 'extension_dir=' . ini_get('extension_dir'), '-d', 'extension=pdo_sqlite']);
-}
-$command = array_merge($command, ['-S', '127.0.0.1:' . IT_PORT, '-t', dirname(__DIR__) . '/public']);
+#start the server on a fresh data folder
+$dataDir = test_data_dir_create('it');
+$command = [PHP_BINARY, '-S', '127.0.0.1:' . IT_PORT, '-t', dirname(__DIR__) . '/public'];
 $env = getenv();
-$env['AOD_DB'] = $dbFile;
+$env['DATA_DIR'] = $dataDir;
 $null = DIRECTORY_SEPARATOR === '\\' ? 'NUL' : '/dev/null';
 $server = proc_open($command, [0 => ['file', $null, 'r'], 1 => ['file', $null, 'w'], 2 => ['file', $null, 'w']], $pipes, null, $env);
 if (!is_resource($server)) {
@@ -207,14 +205,14 @@ try {
     proc_close($server);
 }
 
-#the saved row keeps a JSON copy of the event log
-putenv('AOD_DB=' . $dbFile);
-require_once __DIR__ . '/../src/db.php';
-$rows = db()->query('SELECT rolls, events_json FROM scores')->fetchAll();
-check('exactly one score saved for the win', count($rows) === 1);
-$events = $rows === [] ? null : json_decode($rows[0]['events_json'], true);
-check('score row holds the event log as JSON', is_array($events));
+#the files the server wrote
+$users = read_json('users.json');
+check('users.json holds the one account', array_keys($users) === ['it_user']);
+$entries = read_json('leaderboard.json');
+check('exactly one leaderboard entry saved for the win', count($entries) === 1);
+check('leaderboard entry holds the event log', isset($entries[0]['events']) && is_array($entries[0]['events']));
 
-@unlink($dbFile);
+test_data_dir_remove($dataDir);
+check('temp data folder removed', !is_dir($dataDir));
 echo $failed === 0 ? 'PASS' . PHP_EOL : 'FAIL (' . $failed . ')' . PHP_EOL;
 exit($failed === 0 ? 0 : 1);
