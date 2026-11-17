@@ -31,9 +31,10 @@ require __DIR__ . '/partials/header.php';
 ?>
 <section class="panel form-panel">
     <h1>Create account</h1>
-    <?php foreach ($errors as $error): ?>
-        <p class="error" role="alert">Error: <?= h($error) ?></p>
-    <?php endforeach; ?>
+    <?php if ($errors !== []): ?>
+        <?php #one message at a time, the first rule that failed ?>
+        <p class="error" role="alert">Error: <?= h($errors[0]) ?></p>
+    <?php endif; ?>
     <form method="post" action="register.php" novalidate>
         <?= csrf_field() ?>
         <label for="username">Username</label>

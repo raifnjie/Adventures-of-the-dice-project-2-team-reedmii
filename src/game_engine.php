@@ -52,7 +52,7 @@ function game_new(string $difficulty, array $names): array
 }
 
 #play one turn for the current player and return the new state
-function game_roll(array $state): array
+function take_turn(array $state): array
 {
     if ($state['winner'] !== null) {
         return $state;

@@ -6,7 +6,7 @@ require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/game_engine.php';
 
 auth_start();
-auth_require();
+require_login();
 
 $state = game_load();
 $scores = db_top_scores(db(), 10);

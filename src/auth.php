@@ -36,10 +36,10 @@ function redirect(string $page): never
 #return the session CSRF token, creating it on first use
 function csrf_token(): string
 {
-    if (empty($_SESSION['csrf_token'])) {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    if (empty($_SESSION['csrf'])) {
+        $_SESSION['csrf'] = bin2hex(random_bytes(32));
     }
-    return $_SESSION['csrf_token'];
+    return $_SESSION['csrf'];
 }
 
 #hidden input carrying the CSRF token
@@ -52,7 +52,7 @@ function csrf_field(): string
 function csrf_check(): void
 {
     $sent = $_POST['csrf_token'] ?? '';
-    $known = $_SESSION['csrf_token'] ?? '';
+    $known = $_SESSION['csrf'] ?? '';
     if (!is_string($sent) || $known === '' || !hash_equals($known, $sent)) {
         http_response_code(400);
         exit('Invalid form token. Go back, reload the page, and try again.');
@@ -84,6 +84,9 @@ function post_string(string $key): string
 function auth_validate_registration(string $username, string $password, string $confirm): array
 {
     $errors = [];
+    if ($username === '' || $password === '' || $confirm === '') {
+        return ['Username, password, and confirm password are all required.'];
+    }
     if (!preg_match('/^[A-Za-z0-9_]{3,16}$/', $username)) {
         $errors[] = 'Username must be 3 to 16 characters: letters, digits, and underscore.';
     }
@@ -138,7 +141,7 @@ function auth_check(): bool
 }
 
 #send guests to the login page
-function auth_require(): void
+function require_login(): void
 {
     if (!auth_check()) {
         redirect('login.php');

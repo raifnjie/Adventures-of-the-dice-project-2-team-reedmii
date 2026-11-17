@@ -16,19 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $username = post_string('username');
     $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
-    if ($username === '' || $password === '') {
-        #empty input never reaches the database
-        $error = 'Enter your username and password.';
-    } else {
-        $user = auth_attempt(db(), $username, $password);
-        if ($user === null) {
-            #one message for both cases, so it never reveals whether the name exists
-            $error = 'Invalid username or password.';
-        } else {
-            auth_login($user);
-            redirect('game.php');
-        }
+    #empty input never reaches the database, auth_attempt() returns null first
+    $user = ($username === '' || $password === '') ? null : auth_attempt(db(), $username, $password);
+    if ($user !== null) {
+        auth_login($user);
+        redirect('game.php');
     }
+    #one message for every failure, so it never reveals whether the name exists
+    $error = 'Invalid username or password';
 }
 
 $notice = flash_take();
