@@ -47,6 +47,9 @@ for ($i = 0; $i < 12; $i++) {
 $top = db_top_scores($pdo, 10);
 check('leaderboard returns the top 10', count($top) === 10);
 check('leaderboard sorts by rolls then time', $top[0]['player_name'] === 'quicker' && $top[1]['player_name'] === 'quick' && $top[2]['player_name'] === 'slow');
+db_save_score($pdo, $userId, 'storyteller', 'standard', 99, 99, [['turn' => 4, 'type' => 'bonus', 'cell' => 15]]);
+$saved = $pdo->query("SELECT events_json FROM scores WHERE player_name = 'storyteller'")->fetchColumn();
+check('event log is saved as JSON on the score row', json_decode((string)$saved, true)[0]['cell'] === 15);
 
 check('same player names rejected', game_validate_names(['Ada', 'ada']) !== []);
 check('empty player name rejected', game_validate_names(['', 'Bo']) !== []);

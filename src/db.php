@@ -55,10 +55,19 @@ function db_migrate(PDO $pdo): void
             difficulty TEXT NOT NULL,
             rolls INTEGER NOT NULL,
             time_played INTEGER NOT NULL,
+            events_json TEXT NOT NULL DEFAULT \'[]\',
             created_at TEXT NOT NULL
         )'
     );
     $scores->execute();
+    #older databases were created before the events_json column existed
+    $columns = $pdo->prepare('PRAGMA table_info(scores)');
+    $columns->execute();
+    $names = array_column($columns->fetchAll(), 'name');
+    if (!in_array('events_json', $names, true)) {
+        $alter = $pdo->prepare("ALTER TABLE scores ADD COLUMN events_json TEXT NOT NULL DEFAULT '[]'");
+        $alter->execute();
+    }
 }
 
 #find one user row by name, or null
@@ -84,12 +93,12 @@ function db_create_user(PDO $pdo, string $username, string $hash): int
     return (int)$pdo->lastInsertId();
 }
 
-#store one finished game for the leaderboard
-function db_save_score(PDO $pdo, int $userId, string $playerName, string $difficulty, int $rolls, int $seconds): void
+#store one finished game for the leaderboard, with a JSON copy of its event log
+function db_save_score(PDO $pdo, int $userId, string $playerName, string $difficulty, int $rolls, int $seconds, array $eventsLog = []): void
 {
     $stmt = $pdo->prepare(
-        'INSERT INTO scores (user_id, player_name, difficulty, rolls, time_played, created_at)
-         VALUES (:user_id, :player_name, :difficulty, :rolls, :time_played, :created)'
+        'INSERT INTO scores (user_id, player_name, difficulty, rolls, time_played, events_json, created_at)
+         VALUES (:user_id, :player_name, :difficulty, :rolls, :time_played, :events_json, :created)'
     );
     $stmt->execute([
         ':user_id' => $userId,
@@ -97,6 +106,7 @@ function db_save_score(PDO $pdo, int $userId, string $playerName, string $diffic
         ':difficulty' => $difficulty,
         ':rolls' => $rolls,
         ':time_played' => $seconds,
+        ':events_json' => json_encode(array_values($eventsLog), JSON_THROW_ON_ERROR),
         ':created' => gmdate('Y-m-d H:i:s'),
     ]);
 }

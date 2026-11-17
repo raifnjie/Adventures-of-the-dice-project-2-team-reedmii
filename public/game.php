@@ -8,7 +8,7 @@ require_once __DIR__ . '/../src/game_engine.php';
 const DIFFICULTY_COOKIE = 'aod_difficulty';
 
 auth_start();
-auth_require();
+require_login();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'roll') {
         $state = game_load();
         if ($state !== null && $state['winner'] === null) {
-            $state = game_roll($state);
+            $state = take_turn($state);
             if ($state['winner'] !== null && !$state['score_saved']) {
                 $winner = $state['winner'];
                 db_save_score(
@@ -49,7 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $state['players'][$winner],
                     $state['difficulty'],
                     $state['rolls'][$winner],
-                    game_time_played($state)
+                    game_time_played($state),
+                    $state['events_log']
                 );
                 $state['score_saved'] = true;
             }

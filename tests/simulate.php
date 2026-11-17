@@ -72,7 +72,7 @@ for ($game = 0; $game < SIM_GAMES; $game++) {
 
     while ($state['winner'] === null && $state['turns_taken'] < SIM_MAX_TURNS) {
         $mover = $state['current_turn'];
-        $state = game_roll($state);
+        $state = take_turn($state);
         $roll = $state['last_roll'];
         if (!is_int($roll) || $roll < 1 || $roll > 6) {
             sim_fail($failures, "game $game: roll out of range");
