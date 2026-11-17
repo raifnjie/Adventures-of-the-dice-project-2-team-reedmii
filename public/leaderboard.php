@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/game_engine.php';
+require_once __DIR__ . '/../src/leaderboard.php';
 
 auth_start();
 require_login();
 
 $state = game_load();
-$scores = db_top_scores(db(), 10);
+$scores = leaderboard_top(10);
 $finished = $state !== null && $state['winner'] !== null;
 
 $pageTitle = 'Leaderboard';
@@ -42,7 +43,7 @@ require __DIR__ . '/partials/header.php';
                     <?php foreach ($scores as $index => $score): ?>
                         <tr>
                             <td><?= h($index + 1) ?></td>
-                            <td><?= h($score['player_name']) ?></td>
+                            <td><?= h($score['username']) ?></td>
                             <td><?= h(board_get($score['difficulty'])['label']) ?></td>
                             <td><?= h($score['rolls']) ?></td>
                             <td><?= h(game_format_time((int)$score['time_played'])) ?></td>

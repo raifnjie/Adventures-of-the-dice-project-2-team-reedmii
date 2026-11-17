@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/game_engine.php';
+require_once __DIR__ . '/../src/leaderboard.php';
 
 const DIFFICULTY_COOKIE = 'aod_difficulty';
 
@@ -43,15 +44,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $state = take_turn($state);
             if ($state['winner'] !== null && !$state['score_saved']) {
                 $winner = $state['winner'];
-                db_save_score(
-                    db(),
-                    (int)$_SESSION['user_id'],
+                $entry = leaderboard_entry(
                     $state['players'][$winner],
                     $state['difficulty'],
                     $state['rolls'][$winner],
                     game_time_played($state),
                     $state['events_log']
                 );
+                leaderboard_add($entry);
+                #course wording: store scores with $_SESSION['scores'][]
+                $_SESSION['scores'][] = $entry;
                 $state['score_saved'] = true;
             }
             game_save($state);
@@ -80,7 +82,7 @@ if ($state !== null) {
     $_SESSION['prev_positions'] = $state['positions'];
 }
 
-$cookieDifficulty = $_COOKIE[DIFFICULTY_COOKIE] ?? '';
+$cookieDifficulty = filter_input(INPUT_COOKIE, DIFFICULTY_COOKIE, FILTER_UNSAFE_RAW);
 $chosenDifficulty = $setupInput['difficulty'] ?? (is_string($cookieDifficulty) ? $cookieDifficulty : '');
 if (!board_is_difficulty($chosenDifficulty)) {
     $chosenDifficulty = 'standard';

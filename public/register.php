@@ -16,9 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $username = post_string('username');
     #passwords are not trimmed, spaces may be part of them
-    $password = is_string($_POST['password'] ?? null) ? $_POST['password'] : '';
-    $confirm = is_string($_POST['confirm'] ?? null) ? $_POST['confirm'] : '';
-    $errors = auth_register(db(), $username, $password, $confirm);
+    $password = post_raw('password');
+    $confirm = post_raw('confirm');
+    $errors = auth_register($username, $password, $confirm);
     if ($errors === []) {
         flash_set('Account created. Log in to start playing.');
         redirect('login.php');

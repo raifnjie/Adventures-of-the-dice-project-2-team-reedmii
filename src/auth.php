@@ -2,7 +2,10 @@
 #sessions, CSRF, accounts, and the output helpers every page shares
 declare(strict_types=1);
 
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/storage.php';
+
+const USERS_FILE = 'users.json';
+const USERNAME_PATTERN = '/^[A-Za-z0-9_]{3,16}$/';
 
 #start the session with a hardened cookie
 function auth_start(): void
@@ -51,7 +54,7 @@ function csrf_field(): string
 #reject the request unless the posted token matches the session token
 function csrf_check(): void
 {
-    $sent = $_POST['csrf_token'] ?? '';
+    $sent = post_raw('csrf_token');
     $known = $_SESSION['csrf'] ?? '';
     if (!is_string($sent) || $known === '' || !hash_equals($known, $sent)) {
         http_response_code(400);
@@ -73,11 +76,17 @@ function flash_take(): ?string
     return is_string($message) ? $message : null;
 }
 
+#read one posted field exactly as sent, an array or a missing field becomes ''
+function post_raw(string $key): string
+{
+    $value = filter_input(INPUT_POST, $key, FILTER_UNSAFE_RAW);
+    return is_string($value) ? $value : '';
+}
+
 #read one posted field as a trimmed string
 function post_string(string $key): string
 {
-    $value = $_POST[$key] ?? '';
-    return is_string($value) ? trim($value) : '';
+    return trim(post_raw($key));
 }
 
 #validate the sign-up input and return a list of error messages
@@ -87,7 +96,7 @@ function auth_validate_registration(string $username, string $password, string $
     if ($username === '' || $password === '' || $confirm === '') {
         return ['Username, password, and confirm password are all required.'];
     }
-    if (!preg_match('/^[A-Za-z0-9_]{3,16}$/', $username)) {
+    if (!preg_match(USERNAME_PATTERN, $username)) {
         $errors[] = 'Username must be 3 to 16 characters: letters, digits, and underscore.';
     }
     if (strlen($password) < 8 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/[0-9]/', $password)) {
@@ -99,38 +108,71 @@ function auth_validate_registration(string $username, string $password, string $
     return $errors;
 }
 
+#the stored key that matches a username in any letter case, or null
+function users_key(array $users, string $username): ?string
+{
+    foreach (array_keys($users) as $key) {
+        if (strcasecmp((string)$key, $username) === 0) {
+            return (string)$key;
+        }
+    }
+    return null;
+}
+
+#find one account, returns ['username', 'hash', 'created'] or null
+function users_find(string $username): ?array
+{
+    #only a valid username is ever used as a key
+    if (!preg_match(USERNAME_PATTERN, $username)) {
+        return null;
+    }
+    $users = read_json(USERS_FILE, []);
+    $key = users_key($users, $username);
+    if ($key === null || !isset($users[$key]['hash'])) {
+        return null;
+    }
+    return ['username' => $key] + $users[$key];
+}
+
 #create an account, returns error messages (empty on success)
-function auth_register(PDO $pdo, string $username, string $password, string $confirm): array
+function auth_register(string $username, string $password, string $confirm): array
 {
     $errors = auth_validate_registration($username, $password, $confirm);
     if ($errors !== []) {
         return $errors;
     }
-    if (db_find_user($pdo, $username) !== null) {
-        return ['That username is already taken.'];
-    }
-    db_create_user($pdo, $username, password_hash($password, PASSWORD_DEFAULT));
-    return [];
+    $hash = password_hash($password, PASSWORD_DEFAULT);
+    $taken = false;
+    #check and insert under one lock so two sign-ups cannot claim the same name
+    update_json(USERS_FILE, [], function (array $users) use ($username, $hash, &$taken): ?array {
+        if (users_key($users, $username) !== null) {
+            $taken = true;
+            return null;
+        }
+        $users[$username] = ['hash' => $hash, 'created' => gmdate('c')];
+        return $users;
+    });
+    return $taken ? ['That username is already taken.'] : [];
 }
 
-#check a login, returns the user row or null
-function auth_attempt(PDO $pdo, string $username, string $password): ?array
+#check a login, returns the account or null
+function auth_attempt(string $username, string $password): ?array
 {
     if ($username === '' || $password === '') {
         return null;
     }
-    $user = db_find_user($pdo, $username);
-    if ($user === null || !password_verify($password, $user['password_hash'])) {
+    $user = users_find($username);
+    if ($user === null || !password_verify($password, $user['hash'])) {
         return null;
     }
     return $user;
 }
 
-#mark the session as signed in
+#mark the session as signed in, the stored username is the account id
 function auth_login(array $user): void
 {
     session_regenerate_id(true);
-    $_SESSION['user_id'] = (int)$user['id'];
+    $_SESSION['user_id'] = (string)$user['username'];
     $_SESSION['username'] = (string)$user['username'];
 }
 
